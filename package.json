@@ -1,5 +1,5 @@
 {
-	"name": "request-wrapper-with-error-handling",
+	"name": "downloader",
 	"description": "Wrapper of the package `request` with the additional error logging and alerting",
 	"version": "0.0.1",
 	"author": {
