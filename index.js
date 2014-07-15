@@ -46,18 +46,33 @@ Downloader.prototype = {
         }).delay(Math.floor(Math.random() * (self.rateDelay[1] - self.rateDelay[0] + 1) + self.rateDelay[0]));
     },
 
+    pipe: function (url, stream, attempt) {
+        var self = this;
+        request({
+            "url": url,
+            "headers": headers
+        })
+        .on('error', function (err) {
+            self.logger.error("Can't retrieve " + url + ", " + err);
+            if (typeof attempt != 'undefined' && attempt == self.maxAttempt) return;
+            attempt = typeof attempt == 'undefined' ? 0 : attempt;
+            self.pipe(url, stream, attempt++)
+        })
+        .pipe(stream)
+    },
+
     save: function (url, destination, callback, attempt) {
         var self = this;
         request({
             "url": url,
             "headers": headers
         })
-            .on('error', function (err) {
-                self.logger.error("Can't retrieve " + url + ", " + err);
-                if (typeof attempt != 'undefined' && attempt > 0) return;
-                self.save(url, destination, callback, 1)
-            })
-            .pipe(fs.createWriteStream(destination)).on("finish", callback)
+        .on('error', function (err) {
+            self.logger.error("Can't retrieve " + url + ", " + err);
+            if (typeof attempt != 'undefined' && attempt > 0) return;
+            self.save(url, destination, callback, 1)
+        })
+        .pipe(fs.createWriteStream(destination)).on("finish", callback)
     }
 }
 exports = module.exports = Downloader;
